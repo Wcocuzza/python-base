@@ -30,8 +30,20 @@ import os
 import sys
 from datetime import datetime
 
+arguments = sys.argv[1:]
+valid_operations = {
+    "sum": lambda a, b: a + b,
+    "sub": lambda a, b: a - b,
+    "mul": lambda a, b: a * b,
+    "div": lambda a, b: a / b,
+}
+
+path = os.curdir
+filepath = os.path.join(path, "infixcalc.log")
+timestamp = datetime.now().isoformat()
+user = os.getenv("USER", "Anonymous")
+
 while True:
-    arguments = sys.argv[1:]
 
     # TODO: Exceptions
     if not arguments:
@@ -46,7 +58,6 @@ while True:
 
     operation, *nums = arguments
 
-    valid_operations = ("sum", "sub", "mul", "div")
     if operation not in valid_operations:
         print("Operação inválida")
         print(valid_operations)
@@ -71,31 +82,20 @@ while True:
         print(str(e))
         sys.exit(1)
 
-    # TODO: Usar dict de funcoes
-    if operation == "sum":
-        result = n1 + n2
-    elif operation =="sub":
-        result = n1 - n2
-    elif operation =="mul":
-        result = n1 * n2
-    elif operation =="div":
-        result = n1 / n2
-
-    path = os.curdir
-    filepath = os.path.join(path, "infixcalc.log")
-    timestamp = datetime.now().isoformat()
-    user = os.getenv("USER", "Anonymous")
+    result = valid_operations[operation](n1, n2)
 
     print(f"O Resultado é {result}")
 
     try:
-        with open(filepath, "a") as file_:
-            file_.write(f"{timestamp} - {user} - {operation}, {n1}, {n2} = {result}\n")
+        with open(filepath, "a") as log:
+            log.write(f"{timestamp} - {user} - {operation}, {n1}, {n2} = {result}\n")
     except PermissionError as e:
         # TODO: logging
         print(str(e))
         sys.exit(1)
     
+    arguments = None
+
     cont = input("Deseja efetuar outra operação? [Y/n] ").strip().lower()
     if cont != "y":
         break
